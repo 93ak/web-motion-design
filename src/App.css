@@ -1,0 +1,90 @@
+.app {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  border-bottom: 1px solid #333;
+}
+
+.topbar h1 {
+  font-size: 18px;
+}
+
+.topbar button {
+  background: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.workspace {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 200px 1fr 220px;
+}
+
+.layers,
+.properties {
+  padding: 20px;
+  border-right: 1px solid #333;
+}
+
+.properties {
+  border-right: none;
+  border-left: 1px solid #333;
+}
+
+.layers div {
+  padding: 12px 8px;
+  cursor: pointer;
+}
+
+.layers div:hover {
+  background: #222;
+}
+
+.canvas-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #181818;
+}
+
+.canvas {
+  position:relative;
+
+  width: 700px;
+  height: 400px;
+  background: #222;
+  border: 1px solid #444;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circle{
+  position:absolute;
+
+  left:100px;
+  top:150px; 
+  
+  width:80px;
+  height:80px;
+  border-radius:50%;
+  background:hotpink;
+}
+
+.timeline {
+  height: 150px;
+  border-top: 1px solid #333;
+  padding: 20px;
+}
