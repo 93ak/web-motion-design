@@ -71,20 +71,36 @@
   justify-content: center;
 }
 
-.circle{
-  position:absolute;
-
-  left:100px;
-  top:150px; 
-  
-  width:80px;
-  height:80px;
-  border-radius:50%;
-  background:hotpink;
-}
 
 .timeline {
   height: 150px;
   border-top: 1px solid #333;
   padding: 20px;
+}
+
+.layer-selected {
+  background: #333;
+  border-left: 2px solid hotpink;
+}
+
+.properties label {
+  display: block;
+  margin: 8px 0;
+  font-size: 13px;
+}
+
+.properties input[type="number"] {
+  width: 60px;
+  margin-left: 8px;
+  background: #111;
+  color: white;
+  border: 1px solid #333;
+  border-radius: 4px;
+  padding: 4px 6px;
+}
+
+.properties input[type="range"] {
+  width: 100px;
+  vertical-align: middle;
+  margin-left: 8px;
 }

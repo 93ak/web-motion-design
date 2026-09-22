@@ -1,65 +1,49 @@
-import{ useEffect, useRef} from "react"
-import gsap from "gsap"
+import { useState } from "react";
+import Canvas from "./components/Canvas";
+import LayersPanel from "./components/LayersPanel";
+import PropertiesPanel from "./components/PropertiesPanel";
+import { initialLayers } from "./data/initialLayers";
 
-
-import "./App.css"
+import "./App.css";
 
 function App() {
-  const circleRef=useRef()
-  useEffect(()=>{
-    gsap.to(circleRef.current,{
-    x:400,
-    duration:2,
-    ease:"power2.inOut"
-  })
+  const [layers, setLayers] = useState(initialLayers);
+  const [selectedLayerId, setSelectedLayerId] = useState(initialLayers[0]?.id ?? null);
 
-}, [])
+  const selectedLayer = layers.find((l) => l.id === selectedLayerId) ?? null;
+
+  const updateLayerProperty = (id, key, value) => {
+    setLayers((prev) =>
+      prev.map((layer) =>
+        layer.id === id ? { ...layer, [key]: value } : layer
+      )
+    );
+  };
 
   return (
     <div className="app">
-
       <header className="topbar">
         <h1>Motion Studio</h1>
         <button>▶ Preview</button>
       </header>
 
       <main className="workspace">
-
-        <aside className="layers">
-          <h2>Layers</h2>
-
-          <div>○ Circle</div>
-          <div>T Text</div>
-          <div>□ Cube</div>
-          <div>✦ Particles</div>
-        </aside>
+        <LayersPanel
+          layers={layers}
+          selectedLayerId={selectedLayerId}
+          onSelectLayer={setSelectedLayerId}
+        />
 
         <section className="canvas-area">
-          <div className="canvas">
-            <div ref={circleRef} className="circle"></div>
-          </div>
+          <Canvas layers={layers} />
         </section>
 
-        <aside className="properties">
-          <h2>Properties</h2>
-
-          <p>Position</p>
-          <p>X: 120</p>
-          <p>Y: 200</p>
-
-          <p>Scale: 1</p>
-          <p>Rotation: 0°</p>
-          <p>Opacity: 100%</p>
-        </aside>
-
+        <PropertiesPanel layer={selectedLayer} onChangeProperty={updateLayerProperty} />
       </main>
 
-      <footer className="timeline">
-        Timeline
-      </footer>
-
+      <footer className="timeline">Timeline</footer>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
