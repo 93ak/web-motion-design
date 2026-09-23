@@ -3,6 +3,7 @@ import Canvas from "./components/Canvas";
 import LayersPanel from "./components/LayersPanel";
 import PropertiesPanel from "./components/PropertiesPanel";
 import { initialLayers } from "./data/initialLayers";
+import { nextId } from "./utils/id";
 
 import "./App.css";
 
@@ -20,6 +21,29 @@ function App() {
     );
   };
 
+  const addLayer = () => {
+    const circleCount = layers.filter((l) => l.type === "circle").length + 1;
+    const id = nextId();
+    const newLayer = {
+      id,
+      name: `Circle ${circleCount}`,
+      type: "circle",
+      x: 100 + Math.random() * 450,
+      y: 80 + Math.random() * 220,
+      scale: 1,
+      rotation: 0,
+      opacity: 1,
+      color: "hotpink",
+    };
+    setLayers((prev) => [...prev, newLayer]);
+    setSelectedLayerId(id);
+  };
+
+  const deleteLayer = (id) => {
+    setLayers((prev) => prev.filter((l) => l.id !== id));
+    setSelectedLayerId((prev) => (prev === id ? null : prev));
+  };
+
   return (
     <div className="app">
       <header className="topbar">
@@ -32,6 +56,8 @@ function App() {
           layers={layers}
           selectedLayerId={selectedLayerId}
           onSelectLayer={setSelectedLayerId}
+          onAddLayer={addLayer}
+          onDeleteLayer={deleteLayer}
         />
 
         <section className="canvas-area">

@@ -1,6 +1,6 @@
 function CircleLayer({ layer, innerRef }) {
   const { x, y, scale, rotation, opacity, color } = layer;
-
+//actually creates the HTML element, react component
   return (
     <div
       ref={innerRef}

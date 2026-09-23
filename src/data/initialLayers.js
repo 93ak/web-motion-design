@@ -1,5 +1,4 @@
-let idCounter = 0;
-const nextId = () => `layer-${++idCounter}`;
+import { nextId } from "../utils/id";
 
 export const initialLayers = [
   {

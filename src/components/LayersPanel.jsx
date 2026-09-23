@@ -1,14 +1,27 @@
-function LayersPanel({ layers, selectedLayerId, onSelectLayer }) {
+function LayersPanel({ layers, selectedLayerId, onSelectLayer, onAddLayer, onDeleteLayer }) {
   return (
     <aside className="layers">
-      <h2>Layers</h2>
+      <div className="layers-header">
+        <h2>Layers</h2>
+        <button className="add-layer-btn" onClick={onAddLayer}>+ Add</button>
+      </div>
+
       {layers.map((layer) => (
         <div
           key={layer.id}
-          className={layer.id === selectedLayerId ? "layer-selected" : ""}
+          className={`layer-row ${layer.id === selectedLayerId ? "layer-selected" : ""}`}
           onClick={() => onSelectLayer(layer.id)}
         >
-          {layer.name}
+          <span>{layer.name}</span>
+          <button
+            className="delete-layer-btn"
+            onClick={(e) => {
+              e.stopPropagation(); // don't also select the layer we're deleting
+              onDeleteLayer(layer.id);
+            }}
+          >
+            ×
+          </button>
         </div>
       ))}
     </aside>
