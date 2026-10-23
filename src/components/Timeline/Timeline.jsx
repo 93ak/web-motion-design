@@ -7,7 +7,8 @@ import { LAYER_TYPES } from "../../state/projectFactory";
 import {
   ANIMATABLE_PROPERTIES,
   EASE_OPTIONS,
-  FPS,
+  snapToFrame,
+  timeToFrame,
   PROPERTY_LABELS,
   PROPERTY_SHORT,
   TIME_EPSILON,
@@ -39,7 +40,7 @@ export default function Timeline({
   onUpdateKeyframe,
   onExtendDuration,
 }) {
-  const { duration } = project.settings;
+ const { duration, fps } = project.settings;
   const displayEnd = getDisplayEnd(project);
   const lastKeyframeTime = getLastKeyframeTime(project);
 
@@ -65,7 +66,7 @@ export default function Timeline({
   const timeFromPointer = (e) => {
     const rect = tracksRef.current.getBoundingClientRect();
     const ratio = clamp((e.clientX - rect.left) / rect.width, 0, 1);
-    return Math.round(ratio * displayEnd * FPS) / FPS; // snap to whole frames
+    return snapToFrame(ratio * displayEnd, fps); // snap to whole frames
   };
 
   const startScrub = (e) => {
@@ -141,7 +142,7 @@ export default function Timeline({
         </div>
 
         <div className="tl-readout" aria-live="off">
-          {formatTime(currentTime)} · frame {Math.round(currentTime * FPS)} · {duration.toFixed(1)} s
+          {formatTime(currentTime)} · frame {timeToFrame(currentTime, fps)} · {duration.toFixed(1)} s
         </div>
 
         <div className="tl-keyframe-controls">

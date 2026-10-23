@@ -1,6 +1,11 @@
 import gsap from "gsap";
 
-export const FPS = 30;
+export const DEFAULT_FPS = 24;
+
+// Frame helpers. A "frame" is a whole number; time is in seconds.
+export const timeToFrame = (t, fps) => Math.round(t * fps);
+export const frameToTime = (frame, fps) => frame / fps;
+export const snapToFrame = (t, fps) => Math.round(t * fps) / fps;
 export const TIME_EPSILON = 0.001;
 
 export const ANIMATABLE_PROPERTIES = ["x", "y", "scale", "rotation", "opacity"];

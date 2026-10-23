@@ -1,4 +1,4 @@
-import { ANIMATABLE_PROPERTIES, TIME_EPSILON, getEaseFn } from "./animationEngine";
+import { ANIMATABLE_PROPERTIES, getEaseFn } from "./animationEngine";
 
 // Value of one property at time `time`. Pure and deterministic.
 export function evaluateProperty(layer, prop, time) {
@@ -25,19 +25,14 @@ export function evaluateProperty(layer, prop, time) {
   return last.value;
 }
 
-// All of a layer's values at `time`. A draft (an unsaved inspector edit on an
-// animated property) overrides the animated value at exactly that time.
-export function evaluateLayer(layer, time, draft = null) {
+// All of a layer's values at `time`.
+// `overrides` is an optional plain { prop: value } object applied on top of the animated values.
+// The engine knows nothing about where overrides come from (the UI uses them for unsaved edits).
+export function evaluateLayer(layer, time, overrides = null) {
   const values = { ...layer.properties };
   for (const prop of ANIMATABLE_PROPERTIES) {
     values[prop] = evaluateProperty(layer, prop, time);
   }
-  if (
-    draft &&
-    draft.layerId === layer.id &&
-    Math.abs(draft.time - time) < TIME_EPSILON
-  ) {
-    Object.assign(values, draft.values);
-  }
+  if (overrides) Object.assign(values, overrides);
   return values;
 }

@@ -1,5 +1,4 @@
-import { ANIMATABLE_PROPERTIES, TIME_EPSILON } from "./animationEngine";
-
+import { ANIMATABLE_PROPERTIES, DEFAULT_FPS, TIME_EPSILON } from "./animationEngine";
 const LAYER_TYPES = ["rectangle", "circle", "text"];
 const HEX = /^#[0-9a-fA-F]{6}$/;
 const isNum = (v) => typeof v === "number" && Number.isFinite(v);
@@ -16,6 +15,11 @@ function parseSettings(raw) {
     fail("settings.height must be a positive integer (max 8000).");
   if (!isNum(raw.duration) || raw.duration <= 0 || raw.duration > 3600)
     fail("settings.duration must be a positive number of seconds (max 3600).");
+
+  const fps = raw.fps === undefined ? DEFAULT_FPS : raw.fps;
+  if (!Number.isInteger(fps) || fps < 1 || fps > 120)
+    fail("settings.fps must be a whole number between 1 and 120.");
+
   if (raw.background !== "transparent" && !HEX.test(String(raw.background)))
     fail("settings.background must be a #rrggbb colour or 'transparent'.");
   if (typeof raw.loop !== "boolean") fail("settings.loop must be true or false.");
@@ -24,7 +28,7 @@ function parseSettings(raw) {
     width: raw.width,
     height: raw.height,
     duration: raw.duration,
-    fps: 30, // fixed for v1
+    fps,
     background: raw.background,
     loop: raw.loop,
   };

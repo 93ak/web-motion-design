@@ -1,4 +1,5 @@
 import { createId } from "../utils/ids";
+import { DEFAULT_FPS } from "../engine/animationEngine";
 
 export const LAYER_TYPES = {
   rectangle: { label: "Rectangle", icon: "▭" },
@@ -14,7 +15,7 @@ export function createEmptyProject() {
       width: 1920,
       height: 1080,
       duration: 5,
-      fps: 30,
+      fps: DEFAULT_FPS,
       background: "#f5f2ef",
       loop: false,
     },

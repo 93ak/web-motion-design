@@ -67,6 +67,10 @@ function sanitizeSettings(current, patch) {
     const v = Number(patch.duration);
     if (Number.isFinite(v) && v > 0 && v <= 3600) next.duration = Math.round(v * 1000) / 1000;
   }
+  if ("fps" in patch) {
+    const v = Math.round(Number(patch.fps));
+    if (Number.isFinite(v) && v >= 1 && v <= 120) next.fps = v;
+  }
   if ("background" in patch) {
     const v = patch.background;
     if (v === "transparent" || (typeof v === "string" && HEX.test(v))) next.background = v;
@@ -121,6 +125,9 @@ export function projectReducer(project, action) {
       if (value === null) return project;
       return mapLayer(project, action.id, (l) => {
         if (!(action.prop in l.properties) || l.properties[action.prop] === value) return l;
+        // Animated properties change through keyframes only. Editing the base value here
+        // would break the "base equals first keyframe" invariant.
+        if (l.keyframes[action.prop]?.length) return l;
         return { ...l, properties: { ...l.properties, [action.prop]: value } };
       });
     }

@@ -2,10 +2,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 
 // GSAP owns playback TIMING: a tween runs a number from `from` to `duration` linearly.
-// Every frame we hand that number to React as currentTime, and the engine computes
-// what the composition looks like at that time. Scrubbing sets the same state, so
-// playback and scrubbing can never disagree.
-export default function usePlayback({ duration, loop, currentTime, setCurrentTime }) {
+// We publish that number to React only when the FRAME changes (about `fps` times a second),
+// and the engine computes what the composition looks like at that time.
+// Scrubbing sets the same state, so playback and scrubbing share one code path.
+export default function usePlayback({ duration, loop, fps, currentTime, setCurrentTime }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [runId, setRunId] = useState(0);
 
@@ -21,11 +21,19 @@ export default function usePlayback({ duration, loop, currentTime, setCurrentTim
 
     const run = (from) => {
       const proxy = { t: from };
+      let lastFrame = null;
+
       tween = gsap.to(proxy, {
         t: duration,
         duration: Math.max(duration - from, 0.001),
         ease: "none",
-        onUpdate: () => setCurrentTime(proxy.t),
+        onUpdate: () => {
+          const frame = Math.floor(proxy.t * fps + 1e-6);
+          if (frame !== lastFrame) {
+            lastFrame = frame;
+            setCurrentTime(frame / fps);
+          }
+        },
         onComplete: () => {
           if (loop) {
             run(0);
@@ -44,7 +52,7 @@ export default function usePlayback({ duration, loop, currentTime, setCurrentTim
     return () => {
       if (tween) tween.kill();
     };
-  }, [isPlaying, runId, duration, loop, setCurrentTime]);
+  }, [isPlaying, runId, duration, loop, fps, setCurrentTime]);
 
   const play = useCallback(() => setIsPlaying(true), []);
   const pause = useCallback(() => setIsPlaying(false), []);

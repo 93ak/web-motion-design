@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { TIME_EPSILON } from "../engine/animationEngine";
+import { FPS_OPTIONS, TIME_EPSILON } from "../engine/animationEngine";
 
 export default function ProjectSettings({ settings, lastKeyframeTime, onApply, onClose }) {
   const [form, setForm] = useState({
     width: String(settings.width),
     height: String(settings.height),
     duration: String(settings.duration),
+    fps: String(settings.fps),
     transparent: settings.background === "transparent",
     background: settings.background === "transparent" ? "#f5f2ef" : settings.background,
     loop: settings.loop,
@@ -13,6 +14,8 @@ export default function ProjectSettings({ settings, lastKeyframeTime, onApply, o
   const [error, setError] = useState("");
 
   const set = (key, value) => setForm((f) => ({ ...f, [key]: value }));
+
+  const fpsOptions = [...new Set([...FPS_OPTIONS, settings.fps])].sort((a, b) => a - b);
 
   const durationNumber = Number(form.duration);
   const truncates =
@@ -22,6 +25,7 @@ export default function ProjectSettings({ settings, lastKeyframeTime, onApply, o
     const width = Number(form.width);
     const height = Number(form.height);
     const duration = Number(form.duration);
+    const fps = Number(form.fps);
 
     if (!Number.isInteger(width) || width < 1 || width > 8000)
       return setError("Width must be a whole number between 1 and 8000.");
@@ -29,11 +33,14 @@ export default function ProjectSettings({ settings, lastKeyframeTime, onApply, o
       return setError("Height must be a whole number between 1 and 8000.");
     if (!Number.isFinite(duration) || duration <= 0 || duration > 3600)
       return setError("Duration must be greater than 0 and at most 3600 seconds.");
+    if (!Number.isInteger(fps) || fps < 1 || fps > 120)
+      return setError("Frame rate must be a whole number between 1 and 120.");
 
     onApply({
       width,
       height,
       duration,
+      fps,
       loop: form.loop,
       background: form.transparent ? "transparent" : form.background,
     });
@@ -84,8 +91,14 @@ export default function ProjectSettings({ settings, lastKeyframeTime, onApply, o
         )}
 
         <label className="modal-row">
-          Frame rate
-          <input type="text" value="30 FPS (fixed in v1)" disabled readOnly />
+          Frame rate (FPS)
+          <select value={form.fps} onChange={(e) => set("fps", e.target.value)}>
+            {fpsOptions.map((f) => (
+              <option key={f} value={f}>
+                {f}
+              </option>
+            ))}
+          </select>
         </label>
 
         <label className="modal-row check">

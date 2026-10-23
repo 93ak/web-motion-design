@@ -1,3 +1,4 @@
+
 import js from '@eslint/js'
 import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
@@ -16,6 +17,35 @@ export default defineConfig([
     languageOptions: {
       globals: globals.browser,
       parserOptions: { ecmaFeatures: { jsx: true } },
+    },
+  },
+
+  // Add this new object
+  {
+    files: ['src/engine/**/*.js', 'src/state/**/*.js'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['react', 'react-dom', 'react-dom/*'],
+              message: 'engine/ and state/ must not depend on React.',
+            },
+            {
+              group: ['**/components/*', '**/hooks/*'],
+              message: 'engine/ and state/ must not import UI code.',
+            },
+          ],
+        },
+      ],
+      'no-restricted-globals': [
+        'error',
+        'window',
+        'document',
+        'localStorage',
+        'navigator',
+      ],
     },
   },
 ])

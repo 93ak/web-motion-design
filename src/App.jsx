@@ -11,20 +11,23 @@ import { projectReducer } from "./state/projectReducer";
 import { createDemoProject, createEmptyProject, createLayer } from "./state/projectFactory";
 import {
   ANIMATABLE_PROPERTIES,
-  FPS,
   TIME_EPSILON,
   clamp,
   findKeyframeIndexAt,
+  frameToTime,
   getDisplayEnd,
   getLastKeyframeTime,
   roundTime,
+  timeToFrame,
 } from "./engine/animationEngine";
 import { evaluateLayer, evaluateProperty } from "./engine/evaluateProperty";
+import { resolveScene } from "./engine/resolveScene";
+import { withInvariantChecks } from "./state/devInvariants";
 import { downloadProject, loadAutosave, readProjectFile, saveAutosave } from "./utils/projectIO";
 
 import "./App.css";
 
-const historyReducer = withHistory(projectReducer);
+const historyReducer = withHistory(withInvariantChecks(projectReducer));
 const initialProject = loadAutosave() ?? createDemoProject();
 
 function App() {
@@ -42,12 +45,11 @@ function App() {
   const [draft, setDraft] = useState(null); // { layerId, time, values }
   const [settingsOpen, setSettingsOpen] = useState(false);
 
-  const { duration, loop } = project.settings;
+  const { duration, loop, fps } = project.settings;
   const displayEnd = getDisplayEnd(project);
   const isDirty = project !== savedProject; // history keeps object identity, so this is exact
 
-  const playback = usePlayback({ duration, loop, currentTime, setCurrentTime });
-  const { isPlaying, pause } = playback;
+const playback = usePlayback({ duration, loop, fps, currentTime, setCurrentTime });  const { isPlaying, pause } = playback;
 
   const selectedLayer = project.layers.find((l) => l.id === selectedLayerId) ?? null;
 
@@ -56,8 +58,12 @@ function App() {
       ? draft
       : null;
 
-  const inspectorValues = selectedLayer ? evaluateLayer(selectedLayer, currentTime, activeDraft) : null;
-
+// The engine takes plain "overrides" ({ [layerId]: { prop: value } }) and knows nothing about drafts.
+const overrides = activeDraft ? { [activeDraft.layerId]: activeDraft.values } : null;
+const inspectorValues = selectedLayer
+  ? evaluateLayer(selectedLayer, currentTime, overrides?.[selectedLayer.id] ?? null)
+  : null;
+const scene = resolveScene(project, currentTime, overrides);
   // ---- housekeeping effects ----
   // A draft only lives at the exact time/layer it was made.
   useEffect(() => {
@@ -95,10 +101,9 @@ function App() {
     [pause, displayEnd]
   );
 
-  const stepFrame = (direction) => {
-    const frame = Math.round(currentTime * FPS) + direction;
-    seek(frame / FPS);
-  };
+const stepFrame = (direction) => {
+  seek(frameToTime(timeToFrame(currentTime, fps) + direction, fps));
+};
 
   // ---- selection ----
   const selectLayer = (id) => {
@@ -350,13 +355,7 @@ function App() {
           onAdd={addLayer}
         />
 
-        <Canvas
-          project={project}
-          currentTime={currentTime}
-          draft={draft}
-          selectedLayerId={selectedLayerId}
-          onSelectLayer={selectLayer}
-        />
+        <Canvas scene={scene} selectedLayerId={selectedLayerId} onSelectLayer={selectLayer} />
 
         <Inspector
           layer={selectedLayer}
