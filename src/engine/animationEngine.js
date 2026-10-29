@@ -1,6 +1,7 @@
 import gsap from "gsap";
 
 export const DEFAULT_FPS = 24;
+export const FPS_OPTIONS = [12, 15, 24, 25, 30, 48, 60];
 
 // Frame helpers. A "frame" is a whole number; time is in seconds.
 export const timeToFrame = (t, fps) => Math.round(t * fps);
@@ -50,15 +51,18 @@ export const roundTime = (t) => Math.round(t * 1000) / 1000;
 const easeCache = new Map();
 
 // GSAP supplies the easing curves; we only call them as pure functions.
+function parseEase(name) {
+  try {
+    return gsap.parseEase(name);
+  } catch {
+    return undefined;
+  }
+}
+
 export function getEaseFn(name) {
   if (easeCache.has(name)) return easeCache.get(name);
-  let fn = null;
-  try {
-    fn = gsap.parseEase(name);
-  } catch {
-    fn = null;
-  }
-  if (typeof fn !== "function") fn = (p) => p;
+  const parsed = parseEase(name);
+  const fn = typeof parsed === "function" ? parsed : (p) => p; // unknown ease: linear
   easeCache.set(name, fn);
   return fn;
 }

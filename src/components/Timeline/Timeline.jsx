@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import TimeRuler from "./TimeRuler";
 import Playhead from "./Playhead";
 import KeyframeTrack from "./KeyframeTrack";
@@ -49,10 +49,15 @@ export default function Timeline({
   const [timeError, setTimeError] = useState("");
 
   // Auto-expand the selected layer so its property tracks are visible.
-  useEffect(() => {
-    if (!selectedLayerId) return;
-    setExpanded((prev) => (prev.has(selectedLayerId) ? prev : new Set(prev).add(selectedLayerId)));
-  }, [selectedLayerId]);
+    // Auto-expand a layer when it becomes selected. This adjusts state during render
+  // (React's pattern for "state that follows a prop") instead of in an effect.
+  const [lastSelectedId, setLastSelectedId] = useState(selectedLayerId);
+  if (selectedLayerId !== lastSelectedId) {
+    setLastSelectedId(selectedLayerId);
+    if (selectedLayerId && !expanded.has(selectedLayerId)) {
+      setExpanded(new Set(expanded).add(selectedLayerId));
+    }
+  }
 
   const toggleExpanded = (id) =>
     setExpanded((prev) => {

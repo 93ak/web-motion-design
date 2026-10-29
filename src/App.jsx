@@ -66,14 +66,16 @@ const inspectorValues = selectedLayer
 const scene = resolveScene(project, currentTime, overrides);
   // ---- housekeeping effects ----
   // A draft only lives at the exact time/layer it was made.
-  useEffect(() => {
+  // A draft only lives at the exact time/layer it was made.
+  const draftSpot = `${selectedLayerId}@${currentTime}`;
+  const [lastDraftSpot, setLastDraftSpot] = useState(draftSpot);
+  if (draftSpot !== lastDraftSpot) {
+    setLastDraftSpot(draftSpot);
     setDraft(null);
-  }, [currentTime, selectedLayerId]);
+  }
 
   // Keep the playhead inside the visible range if the range shrinks.
-  useEffect(() => {
-    if (currentTime > displayEnd) setCurrentTime(displayEnd);
-  }, [displayEnd, currentTime]);
+  if (currentTime > displayEnd) setCurrentTime(displayEnd);
 
   // Autosave (best-effort recovery after a refresh).
   useEffect(() => {
@@ -263,15 +265,17 @@ const stepFrame = (direction) => {
 
   // ---- keyboard shortcuts (handlers live in a ref so we bind the listener once) ----
   const shortcutsRef = useRef({});
-  shortcutsRef.current = {
-    settingsOpen,
-    save: saveProject,
-    undo: () => dispatch({ type: "UNDO" }),
-    redo: () => dispatch({ type: "REDO" }),
-    togglePlay: playback.toggle,
-    escape,
-    remove: () => (selectedKeyframe ? deleteKeyframe() : deleteSelectedLayer()),
-  };
+  useEffect(() => {
+    shortcutsRef.current = {
+      settingsOpen,
+      save: saveProject,
+      undo: () => dispatch({ type: "UNDO" }),
+      redo: () => dispatch({ type: "REDO" }),
+      togglePlay: playback.toggle,
+      escape,
+      remove: () => (selectedKeyframe ? deleteKeyframe() : deleteSelectedLayer()),
+    };
+});
 
   useEffect(() => {
     const onKeyDown = (e) => {

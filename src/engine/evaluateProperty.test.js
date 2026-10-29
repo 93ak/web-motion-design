@@ -36,7 +36,8 @@ describe("evaluateProperty", () => {
 
   it("interpolates linearly between keyframes", () => {
     const layer = makeLayer({ x: linear([0, 100], [2, 800]) });
-});
+    expect(evaluateProperty(layer, "x", 1)).toBeCloseTo(450, 5);
+  });
 
   it("holds the final value after the last keyframe", () => {
     const layer = makeLayer({ x: linear([0, 100], [2, 800]) });
@@ -59,7 +60,8 @@ describe("evaluateProperty", () => {
       ],
     });
     expect(evaluateProperty(layer, "x", 0.5)).toBeCloseTo(50, 5); // linear segment
-    expect(evaluateProperty(layer, "x", 1.5)).toBeCloseTo(112.5, 5); // power2.in(0.5) = 0.25
+    // GSAP's power2 is cubic: power2.in(0.5) = 0.5³ = 0.125
+    expect(evaluateProperty(layer, "x", 1.5)).toBeCloseTo(112.5, 5);
   });
 
   it("eases out with power2.out (fast start, slow finish)", () => {
@@ -69,7 +71,8 @@ describe("evaluateProperty", () => {
         { time: 2, value: 100, ease: "none" },
       ],
     });
-    expect(evaluateProperty(layer, "x", 1)).toBeCloseTo(87.5, 5); // power2.out(0.5) = 1 − 0.5³ = 0.875
+    // power2.out(0.5) = 1 − 0.5³ = 0.875
+    expect(evaluateProperty(layer, "x", 1)).toBeCloseTo(87.5, 5);
   });
 
   it("falls back to linear for an unknown ease", () => {
